@@ -189,6 +189,13 @@ public:
                                    const C_FLOAT64 & resolution = 1.0e-009);
 
   /**
+   * Calculate advanced statistics for the problem
+   * All partial fisher information and covariance matrices are calculated
+   * based on experiments used for parameter estimation
+   */
+  bool calculateAdvancedStatistics();
+
+  /**
    * Retrieve the root mean square of the objective value.
    * @return const C_FLOAT64 & RMS
    */
@@ -585,6 +592,16 @@ private:
   CMatrix< C_FLOAT64 > mCorrelation;
   CMatrixInterface< CMatrix< C_FLOAT64 > > * mpCorrelationMatrixInterface;
   CDataArray * mpCorrelationMatrix;
+
+  /**
+   * Partial Fisher Information based on subset of experiments
+   * Matrices are calculated either based on a single experiment
+   * or all experiments except one (excluded - X in the attribute name)
+   */
+  std::vector< CMatrix< C_FLOAT64 > * > mParFIMContainer;
+  std::vector< CMatrix< C_FLOAT64 > * > mParFIMXContainer;
+  std::vector< CMatrix< C_FLOAT64 > * > mScaledParFIMContainer;
+  std::vector< CMatrix< C_FLOAT64 > * > mScaledParFIMXContainer;
 
   /**
    * A pointer to the value of the CCopasiParameter holding Create Parameter Sets

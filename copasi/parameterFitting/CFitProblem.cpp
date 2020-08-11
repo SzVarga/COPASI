@@ -91,6 +91,10 @@ CFitProblem::CFitProblem(const CTaskEnum::Task & type,
   mFisher(0, 0),
   mpFisherMatrixInterface(NULL),
   mpFisherMatrix(NULL),
+  mParFIMContainer(0),
+  mParFIMXContainer(0),
+  mScaledParFIMContainer(0),
+  mScaledParFIMXContainer(0),
   mFisherEigenvalues(0, 0),
   mpFisherEigenvaluesMatrixInterface(NULL),
   mpFisherEigenvaluesMatrix(NULL),
@@ -157,6 +161,10 @@ CFitProblem::CFitProblem(const CFitProblem& src,
   mFisher(src.mFisher),
   mpFisherMatrixInterface(NULL),
   mpFisherMatrix(NULL),
+  mParFIMContainer(src.mParFIMContainer.begin(), src.mParFIMContainer.end()),
+  mParFIMXContainer(src.mParFIMXContainer.begin(), src.mParFIMXContainer.end()),
+  mScaledParFIMContainer(src.mScaledParFIMContainer.begin(), src.mScaledParFIMContainer.end()),
+  mScaledParFIMXContainer(src.mScaledParFIMXContainer.begin(), src.mScaledParFIMXContainer.end()),
   mFisherEigenvalues(src.mFisherEigenvalues),
   mpFisherEigenvaluesMatrixInterface(NULL),
   mpFisherEigenvaluesMatrix(NULL),
@@ -2214,6 +2222,8 @@ bool CFitProblem::calculateStatistics(const C_FLOAT64 & factor,
         }
         */
 
+      calculateAdvancedStatistics();
+
       setResidualsRequired(false);
       mStoreResults = true;
       // This is necessary so that CExperiment::printResult shows the correct data.
@@ -2224,6 +2234,64 @@ bool CFitProblem::calculateStatistics(const C_FLOAT64 & factor,
     }
 
   mStoreResults = false;
+  return true;
+}
+
+bool CFitProblem::calculateAdvancedStatistics()
+{
+  std::vector< size_t > ExperimentStartInResiduals = {0};
+
+  size_t i{}, imax{mpExperimentSet->getExperimentCount()};
+  size_t expStart{};
+
+  // Resize partial matrices
+  mParFIMContainer.resize(imax);
+  mParFIMXContainer.resize(imax);
+  mScaledParFIMContainer.resize(imax);
+  mScaledParFIMXContainer.resize(imax);
+
+  for (i = 0; i < imax; ++i)
+  {
+    // Get starting residual for next experiment
+    CExperiment* pExperiment {mpExperimentSet->getExperiment(i)};
+    expStart += pExperiment->getNumDataRows() * pExperiment->getDependentObjectsMap().size();
+    ExperimentStartInResiduals.push_back(expStart);
+
+    // Initiate mParFIMatrices
+    mParFIMContainer.at(i) = new CMatrix< C_FLOAT64 >(0,0);
+    mParFIMXContainer.at(i) = new CMatrix< C_FLOAT64 >(0,0);
+    mScaledParFIMContainer.at(i) = new CMatrix< C_FLOAT64 >(0,0);
+    mScaledParFIMXContainer.at(i) = new CMatrix< C_FLOAT64 >(0,0);
+
+    // Unscaled partial FIMs
+    // Single experiment only
+    calcPartialFIM(mDeltaResidualDeltaParameter, *(mParFIMContainer.at(i)),
+                   ExperimentStartInResiduals[i], ExperimentStartInResiduals[i+1], false);
+    // Single experiment excluded
+    calcPartialFIM(mDeltaResidualDeltaParameter, *(mParFIMXContainer.at(i)),
+                   ExperimentStartInResiduals[i], ExperimentStartInResiduals[i+1], true);
+
+    // Scaled partialFIMs
+    // Single experiment only
+    calcPartialFIM(mDeltaResidualDeltaParameterScaled, *(mScaledParFIMContainer.at(i)),
+                   ExperimentStartInResiduals[i], ExperimentStartInResiduals[i+1], false);
+    // Single experiment excluded
+    calcPartialFIM(mDeltaResidualDeltaParameterScaled, *(mScaledParFIMXContainer.at(i)),
+                   ExperimentStartInResiduals[i], ExperimentStartInResiduals[i+1], true);
+    }
+
+  // Code testing
+    std::cout << "Testing of code:" << std::endl;
+    std::cout << "Number of Experiments: " << imax << std::endl;
+    /*for(int i{}; i < imax; ++i)
+      std::cout << *(mParFIMContainer[i]) << std::endl;
+    */
+    std::cout << *(mScaledParFIMContainer[0]) << std::endl;
+    std::cout << *(mScaledParFIMXContainer[1]) << std::endl;
+    std::cout << mFisherScaled << std::endl;
+
+
+  // Everything went well
   return true;
 }
 

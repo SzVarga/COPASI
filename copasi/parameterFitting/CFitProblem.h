@@ -534,6 +534,17 @@ private:
   CVector< C_FLOAT64 > mParameterSD;
 
   /**
+   * The vectors of standard deviations of parameters
+   * using subset of experiments selected for parameter estimation
+   * Calculated for both a single experiment and all experiments
+   * except one (excluded - X in the attribute name)
+   */
+  std::vector< CVector< C_FLOAT64 > * > mParParameterSDContainer;
+  std::vector< CVector< C_FLOAT64 > * > mParParameterSDXContainer;
+  std::vector< CVector< C_FLOAT64 > * > mScaledParParameterSDContainer;
+  std::vector< CVector< C_FLOAT64 > * > mScaledParParameterSDXContainer;
+
+  /**
    * the Jacobian of tha parameter estimation,
    *i.e. the derivatives of the residuals with respect to the parameters
    */
@@ -594,7 +605,8 @@ private:
   CDataArray * mpCorrelationMatrix;
 
   /**
-   * Partial Fisher Information based on subset of experiments
+   * Partial Fisher Information and Covariance matrices
+   * based on a subset of experiments selected for parameter estimation
    * Matrices are calculated either based on a single experiment
    * or all experiments except one (excluded - X in the attribute name)
    */
@@ -602,6 +614,10 @@ private:
   std::vector< CMatrix< C_FLOAT64 > * > mParFIMXContainer;
   std::vector< CMatrix< C_FLOAT64 > * > mScaledParFIMContainer;
   std::vector< CMatrix< C_FLOAT64 > * > mScaledParFIMXContainer;
+  std::vector< CMatrix< C_FLOAT64 > * > mParCovMContainer;
+  std::vector< CMatrix< C_FLOAT64 > * > mParCovMXContainer;
+  std::vector< CMatrix< C_FLOAT64 > * > mScaledParCovMContainer;
+  std::vector< CMatrix< C_FLOAT64 > * > mScaledParCovMXContainer;
 
   /**
    * A pointer to the value of the CCopasiParameter holding Create Parameter Sets

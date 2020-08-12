@@ -82,6 +82,10 @@ CFitProblem::CFitProblem(const CTaskEnum::Task & type,
   mRMS(std::numeric_limits<C_FLOAT64>::quiet_NaN()),
   mSD(std::numeric_limits<C_FLOAT64>::quiet_NaN()),
   mParameterSD(0),
+  mParParameterSDContainer(0),
+  mParParameterSDXContainer(0),
+  mScaledParParameterSDContainer(0),
+  mScaledParParameterSDXContainer(0),
   mDeltaResidualDeltaParameter(0, 0),
   mpDeltaResidualDeltaParameterInterface(NULL),
   mpDeltaResidualDeltaParameterMatrix(NULL),
@@ -113,6 +117,10 @@ CFitProblem::CFitProblem(const CTaskEnum::Task & type,
   mCorrelation(0, 0),
   mpCorrelationMatrixInterface(NULL),
   mpCorrelationMatrix(NULL),
+  mParCovMContainer(0),
+  mParCovMXContainer(0),
+  mScaledParCovMContainer(0),
+  mScaledParCovMXContainer(0),
   mpCreateParameterSets(NULL),
   mTrajectoryUpdate(false),
   mpUseTimeSens(NULL),
@@ -152,6 +160,10 @@ CFitProblem::CFitProblem(const CFitProblem& src,
   mRMS(src.mRMS),
   mSD(src.mSD),
   mParameterSD(src.mParameterSD),
+  mParParameterSDContainer(src.mParParameterSDContainer.begin(), src.mParParameterSDContainer.end()),
+  mParParameterSDXContainer(src.mParParameterSDXContainer.begin(), src.mParParameterSDXContainer.end()),
+  mScaledParParameterSDContainer(src.mScaledParParameterSDContainer.begin(), src.mScaledParParameterSDContainer.end()),
+  mScaledParParameterSDXContainer(src.mScaledParParameterSDXContainer.begin(), src.mScaledParParameterSDXContainer.end()),
   mDeltaResidualDeltaParameter(src.mDeltaResidualDeltaParameter),
   mpDeltaResidualDeltaParameterInterface(NULL),
   mpDeltaResidualDeltaParameterMatrix(NULL),
@@ -183,6 +195,10 @@ CFitProblem::CFitProblem(const CFitProblem& src,
   mCorrelation(src.mCorrelation),
   mpCorrelationMatrixInterface(NULL),
   mpCorrelationMatrix(NULL),
+  mParCovMContainer(src.mParCovMContainer.begin(), src.mParCovMContainer.end()),
+  mParCovMXContainer(src.mParCovMXContainer.begin(), src.mParCovMXContainer.end()),
+  mScaledParCovMContainer(src.mScaledParCovMContainer.begin(), src.mScaledParCovMContainer.end()),
+  mScaledParCovMXContainer(src.mScaledParCovMXContainer.begin(), src.mScaledParCovMXContainer.end()),
   mpCreateParameterSets(NULL),
   mTrajectoryUpdate(false),
   mpUseTimeSens(NULL),
@@ -219,6 +235,26 @@ CFitProblem::~CFitProblem()
   pdelete(mpCorrelationMatrix);
 
   pdelete(mpTimeSensProblem);
+
+  // Delete all partial matrices and sd vectors
+  for(size_t i{}; i < mParFIMContainer.size(); ++i)
+    {
+      pdelete(mParFIMContainer.at(i));
+      pdelete(mParFIMXContainer.at(i));
+      pdelete(mScaledParFIMContainer.at(i));
+      pdelete(mScaledParFIMXContainer.at(i));
+
+      pdelete(mParCovMContainer.at(i));
+      pdelete(mParCovMXContainer.at(i));
+      pdelete(mScaledParCovMContainer.at(i));
+      pdelete(mScaledParCovMXContainer.at(i));
+
+      pdelete(mParParameterSDContainer.at(i));
+      pdelete(mParParameterSDXContainer.at(i));
+      pdelete(mScaledParParameterSDContainer.at(i));
+      pdelete(mScaledParParameterSDXContainer.at(i));
+    }
+
 }
 
 void CFitProblem::initObjects()
@@ -2244,12 +2280,23 @@ bool CFitProblem::calculateAdvancedStatistics()
   size_t i{}, imax{mpExperimentSet->getExperimentCount()};
   size_t expStart{};
 
-  // Resize partial matrices
+  // Resize partial matrices and partial sd vectors
   mParFIMContainer.resize(imax);
   mParFIMXContainer.resize(imax);
   mScaledParFIMContainer.resize(imax);
   mScaledParFIMXContainer.resize(imax);
 
+  mParCovMContainer.resize(imax);
+  mParCovMXContainer.resize(imax);
+  mScaledParCovMContainer.resize(imax);
+  mScaledParCovMXContainer.resize(imax);
+
+  mParParameterSDContainer.resize(imax);
+  mParParameterSDXContainer.resize(imax);
+  mScaledParParameterSDContainer.resize(imax);
+  mScaledParParameterSDXContainer.resize(imax);
+
+  // Iterate through all experiments
   for (i = 0; i < imax; ++i)
   {
     // Get starting residual for next experiment
@@ -2257,13 +2304,25 @@ bool CFitProblem::calculateAdvancedStatistics()
     expStart += pExperiment->getNumDataRows() * pExperiment->getDependentObjectsMap().size();
     ExperimentStartInResiduals.push_back(expStart);
 
-    // Initiate mParFIMatrices
+    // Initiate partial fisher matrices
     mParFIMContainer.at(i) = new CMatrix< C_FLOAT64 >(0,0);
     mParFIMXContainer.at(i) = new CMatrix< C_FLOAT64 >(0,0);
     mScaledParFIMContainer.at(i) = new CMatrix< C_FLOAT64 >(0,0);
     mScaledParFIMXContainer.at(i) = new CMatrix< C_FLOAT64 >(0,0);
 
-    // Unscaled partial FIMs
+    // Initiate covariance matrices
+    mParCovMContainer.at(i) = new CMatrix< C_FLOAT64 >(0,0);
+    mParCovMXContainer.at(i) = new CMatrix< C_FLOAT64 >(0,0);
+    mScaledParCovMContainer.at(i) = new CMatrix< C_FLOAT64 >(0,0);
+    mScaledParCovMXContainer.at(i) = new CMatrix< C_FLOAT64 >(0,0);
+
+    // Initiate partial parameter sd vectors
+    mParParameterSDContainer.at(i) = new CVector< C_FLOAT64 >(0);
+    mParParameterSDXContainer.at(i) = new CVector< C_FLOAT64 >(0);
+    mScaledParParameterSDContainer.at(i) = new CVector< C_FLOAT64 >(0);
+    mScaledParParameterSDXContainer.at(i) = new CVector< C_FLOAT64 >(0);
+
+    // Calculate unscaled partial fisher information matrices
     // Single experiment only
     calcPartialFIM(mDeltaResidualDeltaParameter, *(mParFIMContainer.at(i)),
                    ExperimentStartInResiduals[i], ExperimentStartInResiduals[i+1], false);
@@ -2271,24 +2330,33 @@ bool CFitProblem::calculateAdvancedStatistics()
     calcPartialFIM(mDeltaResidualDeltaParameter, *(mParFIMXContainer.at(i)),
                    ExperimentStartInResiduals[i], ExperimentStartInResiduals[i+1], true);
 
-    // Scaled partialFIMs
+    // Calculate scaled partial fisher information matrices
     // Single experiment only
     calcPartialFIM(mDeltaResidualDeltaParameterScaled, *(mScaledParFIMContainer.at(i)),
                    ExperimentStartInResiduals[i], ExperimentStartInResiduals[i+1], false);
     // Single experiment excluded
     calcPartialFIM(mDeltaResidualDeltaParameterScaled, *(mScaledParFIMXContainer.at(i)),
                    ExperimentStartInResiduals[i], ExperimentStartInResiduals[i+1], true);
+
+    // Calculate covariance matrices and parameter sd based on unscaled FIM
+    // Single experiment only
+    calcCov(*(mParFIMContainer.at(i)), *(mParCovMContainer.at(i)), *(mParParameterSDContainer.at(i)), true);
+    // Single experiment excluded
+    calcCov(*(mParFIMXContainer.at(i)), *(mParCovMXContainer.at(i)), *(mParParameterSDXContainer.at(i)), true);
+
+    // Calculate covariance matrices and parameter  based on scaled FIM
+    // Single experiment only
+    calcCov(*(mScaledParFIMContainer.at(i)), *(mScaledParCovMContainer.at(i)), *(mScaledParParameterSDContainer.at(i)), true);
+    // Single experiment excluded
+    calcCov(*(mScaledParFIMXContainer.at(i)), *(mScaledParCovMXContainer.at(i)), *(mScaledParParameterSDXContainer.at(i)), true);
+
     }
 
   // Code testing
     std::cout << "Testing of code:" << std::endl;
     std::cout << "Number of Experiments: " << imax << std::endl;
-    /*for(int i{}; i < imax; ++i)
-      std::cout << *(mParFIMContainer[i]) << std::endl;
-    */
-    std::cout << *(mScaledParFIMContainer[0]) << std::endl;
-    std::cout << *(mScaledParFIMXContainer[1]) << std::endl;
-    std::cout << mFisherScaled << std::endl;
+    std::cout << *(mScaledParCovMContainer[imax-1]) << std::endl;
+    std::cout << *(mScaledParParameterSDXContainer[0]) << std::endl;
 
 
   // Everything went well

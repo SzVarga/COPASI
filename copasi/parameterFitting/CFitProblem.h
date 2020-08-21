@@ -165,6 +165,20 @@ public:
   void calcPartialFIM(const CMatrix< C_FLOAT64 >& jacobian, CMatrix< C_FLOAT64 >& fim, size_t a, size_t b, bool exclude = false);
 
   /**
+   * calculate the summary fisher information matrix for the experiments
+   * @param vector of partial FIMs
+   * @return Matrix containing the diagonal elements of the input matrices as rows
+   */
+  bool calcSummaryFIM(const std::vector< CMatrix< C_FLOAT64 > * >& iMatVec, CMatrix< C_FLOAT64 >& oMat);
+
+  /**
+   * calculate the summary sd Matrix for the experiments
+   * @param Vector of SD-Vectors of the parameters
+   * @return Matrix containing the SD-Vectors as rows
+   */
+  bool calcSummarySD(const std::vector< CVector< C_FLOAT64 > * >& iSDVec, CMatrix< C_FLOAT64 >& oMat);
+
+  /**
    * calculate the Eigenvalues and -vectors for a matrix.
    * This is intended for the FIM, and we assume only real (and positive) eigenvalues
    */
@@ -618,6 +632,31 @@ private:
   std::vector< CMatrix< C_FLOAT64 > * > mParCovMXContainer;
   std::vector< CMatrix< C_FLOAT64 > * > mScaledParCovMContainer;
   std::vector< CMatrix< C_FLOAT64 > * > mScaledParCovMXContainer;
+
+  /**
+   * Summary Partial Fisher Information and Standard deviations
+   * of experiments selected for parameter estimation
+   * Matrices are calculated either based on a single experiment
+   * or all experiments except one (excluded - X in the attribute name)
+   */
+  CMatrix< C_FLOAT64 > mParFIM;
+  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpParFIMInterface;
+  CDataArray * mpParFIMatrix;
+  CMatrix< C_FLOAT64 > mParFIMX;
+  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpParFIMXInterface;
+  CDataArray * mpParFIMXatrix;
+  CMatrix< C_FLOAT64 > mScaledParFIM;
+  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpScaledParFIMInterface;
+  CDataArray * mpScaledParFIMatrix;
+  CMatrix< C_FLOAT64 > mScaledParFIMX;
+  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpScaledParFIMXInterface;
+  CDataArray * mpScaledParFIMXatrix;
+  CMatrix< C_FLOAT64 > mParParameterSD;
+  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpParParameterSDInterface;
+  CDataArray * mpParParameterSDMatrix;
+  CMatrix< C_FLOAT64 > mParParameterSDX;
+  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpParParameterSDXInterface;
+  CDataArray * mpParParameterSDXMatrix;
 
   /**
    * A pointer to the value of the CCopasiParameter holding Create Parameter Sets

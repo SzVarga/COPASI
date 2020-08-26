@@ -111,6 +111,12 @@ CFitProblem::CFitProblem(const CTaskEnum::Task & type,
   mScaledParFIMX(0, 0),
   mpScaledParFIMXInterface(NULL),
   mpScaledParFIMXatrix(NULL),
+  mRelFIM(0, 0),
+  mpRelFIMInterface(NULL),
+  mpRelFIMatrix(NULL),
+  mRelSD(0, 0),
+  mpRelSDInterface(NULL),
+  mpRelSDMatrix(NULL),
   mFisherEigenvalues(0, 0),
   mpFisherEigenvaluesMatrixInterface(NULL),
   mpFisherEigenvaluesMatrix(NULL),
@@ -207,6 +213,12 @@ CFitProblem::CFitProblem(const CFitProblem& src,
   mScaledParFIMX(src.mScaledParFIMX),
   mpScaledParFIMXInterface(src.mpScaledParFIMXInterface),
   mpScaledParFIMXatrix(src.mpScaledParFIMXatrix),
+  mRelFIM(src.mRelFIM),
+  mpRelFIMInterface(src.mpRelFIMInterface),
+  mpRelFIMatrix(src.mpRelFIMatrix),
+  mRelSD(src.mRelSD),
+  mpRelSDInterface(src.mpRelSDInterface),
+  mpRelSDMatrix(src.mpRelSDMatrix),
   mFisherEigenvalues(src.mFisherEigenvalues),
   mpFisherEigenvaluesMatrixInterface(NULL),
   mpFisherEigenvaluesMatrix(NULL),
@@ -304,6 +316,10 @@ CFitProblem::~CFitProblem()
   pdelete(mpParParameterSDMatrix);
   pdelete(mpParParameterSDXInterface);
   pdelete(mpParParameterSDXMatrix);
+  pdelete(mpRelFIMInterface);
+  pdelete(mpRelFIMatrix);
+  pdelete(mpRelSDInterface);
+  pdelete(mpRelSDMatrix);
 }
 
 void CFitProblem::initObjects()
@@ -1796,7 +1812,41 @@ bool CFitProblem::calcSummarySD(const std::vector<CVector<double> *> &iSDVec, CM
     {
       oMat(i, j) = SDVec[j];
     }
+    }
+}
+
+bool CFitProblem::calcRelFIM(const CMatrix<double> &partial, const CMatrix<double> &complete, CMatrix<double> &relMat)
+{
+  size_t imax{partial.numRows()};
+  size_t jmax{partial.numCols()};
+
+  for(size_t i{}; i < imax; ++i)
+  {
+      for(size_t j{}; j < jmax; ++j)
+      {
+          relMat(i, j) = partial(i, j) / complete(i, i);
+      }
   }
+  return true;
+}
+
+bool CFitProblem::calcRelSD(const CMatrix< C_FLOAT64 >& partial, const CVector< C_FLOAT64 >& complete,
+                            CMatrix< C_FLOAT64 >& relMat)
+{
+  size_t imax{partial.numRows()};
+  size_t jmax{partial.numCols()};
+
+  relMat.resize(imax, jmax);
+
+  //calculate entries of relSD matrix
+  for(size_t i{}; i < imax; ++i)
+    {
+      for(size_t j{}; j < jmax; ++j)
+        {
+          relMat(i, j) = (partial(i, j) / complete[j]) - 1;
+        }
+    }
+  return(true);
 }
 
 void CFitProblem::calcEigen(const CMatrix< C_FLOAT64 >& fim, CMatrix< C_FLOAT64 >& eigenvalues, CMatrix< C_FLOAT64 >& eigenvectors)
@@ -2482,6 +2532,19 @@ bool CFitProblem::calculateAdvancedStatistics()
   mpParParameterSDXMatrix->setDimensionDescription(1, "Parameters");
   mpParParameterSDXMatrix->setMode(CDataArray::Mode::Strings);
 
+  mpRelFIMInterface = new CMatrixInterface< CMatrix< C_FLOAT64 > >(&mRelFIM);
+  mpRelFIMatrix = new CDataArray("Relative Fisher Information content", this, mpRelFIMInterface, false);
+  mpRelFIMatrix->setDescription("Scaled Fisher Information of single experiment on parameter");
+  mpRelFIMatrix->setDimensionDescription(0, "Experiments");
+  mpRelFIMatrix->setDimensionDescription(1, "Parameters");
+  mpRelFIMatrix->setMode(CDataArray::Mode::Strings);
+  mpRelSDInterface = new CMatrixInterface< CMatrix< C_FLOAT64 > >(&mRelSD);
+  mpRelSDMatrix = new CDataArray("Relative Change in parameter sd", this, mpRelSDInterface, false);
+  mpRelSDMatrix->setDescription("Change in parameter standard deviation when single experiment is excluded");
+  mpRelSDMatrix->setDimensionDescription(0, "Experiments");
+  mpRelSDMatrix->setDimensionDescription(1, "Parameters");
+  mpRelSDMatrix->setMode(CDataArray::Mode::Strings);
+
   // Resize summary matrices
   mParFIM.resize(imax, jmax);
   mpParFIMatrix->resize();
@@ -2496,6 +2559,11 @@ bool CFitProblem::calculateAdvancedStatistics()
   mParParameterSDX.resize(imax, jmax);
   mpParParameterSDXMatrix->resize();
 
+  mRelFIM.resize(imax, jmax);
+  mpRelFIMatrix->resize();
+  mRelSD.resize(imax, jmax);
+  mpRelSDMatrix->resize();
+
   // Calculate matrices
   calcSummaryFIM(mParFIMContainer, mParFIM);
   calcSummaryFIM(mParFIMXContainer, mParFIMX);
@@ -2503,6 +2571,9 @@ bool CFitProblem::calculateAdvancedStatistics()
   calcSummaryFIM(mScaledParFIMXContainer, mScaledParFIMX);
   calcSummarySD(mParParameterSDContainer, mParParameterSD);
   calcSummarySD(mParParameterSDXContainer, mParParameterSDX);
+
+  calcRelFIM(mScaledParFIM, mFisherScaled, mRelFIM);
+  calcRelSD(mParParameterSD, mParameterSD, mRelSD);
 
   /* Annotations */
   std::vector<COptItem * >::iterator it = mpOptItems->begin();
@@ -2521,6 +2592,9 @@ bool CFitProblem::calculateAdvancedStatistics()
       mpScaledParFIMXatrix->setAnnotationString(0, i, Annotation);
       mpParParameterSDMatrix->setAnnotationString(0, i, Annotation);
       mpParParameterSDXMatrix->setAnnotationString(0, i, Annotation);
+
+      mpRelFIMatrix->setAnnotationString(0, i, Annotation);
+      mpRelSDMatrix->setAnnotationString(0, i, Annotation);
     }
 
   // Annotations on parameters
@@ -2538,6 +2612,9 @@ bool CFitProblem::calculateAdvancedStatistics()
       mpScaledParFIMXatrix->setAnnotationString(1, k, Annotation);
       mpParParameterSDMatrix->setAnnotationString(1, k, Annotation);
       mpParParameterSDXMatrix->setAnnotationString(1, k, Annotation);
+
+      mpRelFIMatrix->setAnnotationString(1, k, Annotation);
+      mpRelSDMatrix->setAnnotationString(1, k, Annotation);
     }
 
   // Code testing
@@ -2552,6 +2629,8 @@ bool CFitProblem::calculateAdvancedStatistics()
     std::cout << *mpParParameterSDMatrix << std::endl;
     std::cout << *mpParParameterSDXMatrix << std::endl;
     std::cout << std::endl;
+    std::cout << *mpRelFIMatrix << std::endl;
+    std::cout << *mpRelSDMatrix << std::endl;
 
   // Clean up
   pdelete(pExperiment);

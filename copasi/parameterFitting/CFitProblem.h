@@ -179,6 +179,21 @@ public:
   bool calcSummarySD(const std::vector< CVector< C_FLOAT64 > * >& iSDVec, CMatrix< C_FLOAT64 >& oMat);
 
   /**
+   * calculate matrices containing relative values
+   * @param  summary partial Matrix (FIM or CovM) and complete FIM or CovM
+   * @return matrix containing relative entries
+   */
+  bool calcRelFIM(const CMatrix< C_FLOAT64 >& partial, const CMatrix< C_FLOAT64 >& complete, CMatrix< C_FLOAT64 >& relMat);
+
+  /**
+   * calculate matrix of relative standard deviation of parameters
+   * @param  summary partial sd matrix and complete parameter sd vector
+   * @return matrix containing change of parameter sd uppon discarding single experiment
+   */
+  bool calcRelSD(const CMatrix< C_FLOAT64 >& partial, const CVector< C_FLOAT64 >& complete,
+                 CMatrix< C_FLOAT64 >& relMat);
+
+  /**
    * calculate the Eigenvalues and -vectors for a matrix.
    * This is intended for the FIM, and we assume only real (and positive) eigenvalues
    */
@@ -657,6 +672,22 @@ private:
   CMatrix< C_FLOAT64 > mParParameterSDX;
   CMatrixInterface< CMatrix< C_FLOAT64 > > * mpParParameterSDXInterface;
   CDataArray * mpParParameterSDXMatrix;
+
+  /**
+   * The Relative Fisher Information matrix,
+   * containing relative information content of single experiments on parameters
+   */
+  CMatrix< C_FLOAT64 > mRelFIM;
+  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpRelFIMInterface;
+  CDataArray * mpRelFIMatrix;
+
+  /**
+   * The Relative sd matrix, containing the relative
+   * change of parameter sd, when a single experiment is neglected
+   */
+  CMatrix< C_FLOAT64 > mRelSD;
+  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpRelSDInterface;
+  CDataArray * mpRelSDMatrix;
 
   /**
    * A pointer to the value of the CCopasiParameter holding Create Parameter Sets

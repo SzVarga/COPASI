@@ -2398,7 +2398,7 @@ bool CFitProblem::calculateStatistics(const C_FLOAT64 & factor,
         }
         */
 
-      calculateAdvancedStatistics();
+      calculatePartialStatistics();
 
       setResidualsRequired(false);
       mStoreResults = true;
@@ -2413,7 +2413,7 @@ bool CFitProblem::calculateStatistics(const C_FLOAT64 & factor,
   return true;
 }
 
-bool CFitProblem::calculateAdvancedStatistics()
+bool CFitProblem::calculatePartialStatistics()
 {  
   /* Calculation of partial matrices */
   std::vector< size_t > ExperimentStartInResiduals = {0};

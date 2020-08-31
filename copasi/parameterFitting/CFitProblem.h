@@ -222,7 +222,7 @@ public:
    * All partial fisher information and covariance matrices are calculated
    * based on experiments used for parameter estimation
    */
-  bool calculateAdvancedStatistics();
+  bool calculatePartialStatistics();
 
   /**
    * Retrieve the root mean square of the objective value.

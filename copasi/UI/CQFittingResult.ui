@@ -17,8 +17,8 @@
   <property name="caption" stdset="0">
    <string>Fitting Result</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QLabel" name="mpLblResult">
@@ -52,7 +52,7 @@
      </item>
     </layout>
    </item>
-   <item>
+   <item row="1" column="0">
     <widget class="QTabWidget" name="mpTabWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
@@ -67,7 +67,7 @@
       </size>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>6</number>
      </property>
      <widget class="CQFittingResultTab1" name="mpMain">
       <attribute name="title">
@@ -187,7 +187,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>593</width>
+         <width>598</width>
          <height>2400</height>
         </rect>
        </property>
@@ -322,6 +322,64 @@
         </item>
        </layout>
       </widget>
+     </widget>
+     <widget class="QWidget" name="mpPartialStatisticsPage">
+      <attribute name="title">
+       <string>Partial Statistics</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QScrollArea" name="mpPartialStatisticsScrollArea">
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>612</width>
+            <height>218</height>
+           </rect>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <item>
+            <widget class="QLabel" name="mpLblRelFisherInformation">
+             <property name="text">
+              <string>Relative Scaled Fisher Information</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="CQArrayAnnotationsWidget" name="mpRelFisherInformationMatrix" native="true"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="mpLblRelSDChange">
+             <property name="text">
+              <string>Relative Change in parameter sd (experiment excluded)</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="CQArrayAnnotationsWidget" name="mpRelSDMatrix" native="true"/>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+      </layout>
      </widget>
      <widget class="QTreeWidget" name="mpCrossValidations">
       <property name="editTriggers">
@@ -458,8 +516,8 @@
    <slot>slotSave()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>571</x>
-     <y>109</y>
+     <x>625</x>
+     <y>97</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>
@@ -474,8 +532,8 @@
    <slot>slotUpdateModel()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>490</x>
-     <y>109</y>
+     <x>533</x>
+     <y>97</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>

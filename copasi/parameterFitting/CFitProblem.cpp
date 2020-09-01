@@ -1813,6 +1813,7 @@ bool CFitProblem::calcSummarySD(const std::vector<CVector<double> *> &iSDVec, CM
       oMat(i, j) = SDVec[j];
     }
     }
+  return true;
 }
 
 bool CFitProblem::calcRelFIM(const CMatrix<double> &partial, const CMatrix<double> &complete, CMatrix<double> &relMat)
@@ -2414,7 +2415,11 @@ bool CFitProblem::calculateStatistics(const C_FLOAT64 & factor,
 }
 
 bool CFitProblem::calculatePartialStatistics()
-{  
+{
+  /* Only calculate if regular statistics is also calculated */
+  if(!(*mpParmCalculateStatistics) || !(*mpParmCalculatePartialStatistics))
+    return false;
+
   /* Calculation of partial matrices */
   std::vector< size_t > ExperimentStartInResiduals = {0};
   CExperiment* pExperiment;
@@ -2486,12 +2491,12 @@ bool CFitProblem::calculatePartialStatistics()
     // Single experiment excluded
     calcCov(*(mParFIMXContainer.at(i)), *(mParCovMXContainer.at(i)), *(mParParameterSDXContainer.at(i)), true);
 
-    // Calculate covariance matrices and parameter  based on scaled FIM
+    // Calculate covariance matrices and parameter based on scaled FIM
     // Single experiment only
     calcCov(*(mScaledParFIMContainer.at(i)), *(mScaledParCovMContainer.at(i)), *(mScaledParParameterSDContainer.at(i)), true);
     // Single experiment excluded
     calcCov(*(mScaledParFIMXContainer.at(i)), *(mScaledParCovMXContainer.at(i)), *(mScaledParParameterSDXContainer.at(i)), true);
-    }
+  }
 
   /* Calculation of summary matrices */
   // Initiate summary matrices
@@ -2668,6 +2673,16 @@ CDataArray & CFitProblem::getScaledParameterEstimationJacobian() const
 CDataArray & CFitProblem::getFisherInformation() const
 {
   return *mpFisherMatrix;
+}
+
+CDataArray &CFitProblem::getRelFisherInformation() const
+{
+  return *mpRelFIMatrix;
+}
+
+CDataArray &CFitProblem::getRelSDMatrix() const
+{
+  return *mpRelSDMatrix;
 }
 
 CDataArray & CFitProblem::getFisherInformationEigenvalues() const

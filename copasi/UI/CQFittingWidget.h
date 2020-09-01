@@ -60,6 +60,7 @@ protected slots:
   void slotPageChange(QWidget * currentPage);
   void slotPageIndexChange(int currentIndex);
   void slotCrossValidationData();
+  //void slotCheckStatisticsChange(int checkStatus);
 
 private:
   void init();

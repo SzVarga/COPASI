@@ -319,6 +319,18 @@ public:
   const bool & getCalculateStatistics() const;
 
   /**
+   * Set whether we have to calculate partial statistics
+   * @param const bool & calculate
+   */
+  void setCalculatePartialStatistics(const bool & calculate);
+
+  /**
+   * Retrieve whether we have to calculate partial statistics
+   * @return const bool & maximize
+   */
+  const bool & getCalculatePartialStatistics() const;
+
+  /**
    * Retrieve the evaluation counter.
    * @return const unsigned C_INT32 & functionEvaluations
    */
@@ -435,6 +447,11 @@ protected:
    * A pointer to the value of the CCopasiParameter holding Calculate Statistics
    */
   bool * mpParmCalculateStatistics;
+
+  /**
+   * A pointer to the value of the CCopasiParameter holding Calculate Partial Statistics
+   */
+  bool * mpParmCalculatePartialStatistics;
 
   /**
    * A pointer to the value of the CCopasiParameterGroup holding the OptimizationItems

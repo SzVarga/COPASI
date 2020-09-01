@@ -260,6 +260,18 @@ public:
   CDataArray & getFisherInformation() const;
 
   /**
+   * Retrieve the Relative Fisher Information content matrix of experiments.
+   * @return CArrayAnnotation & relFIMatrix
+   */
+  CDataArray & getRelFisherInformation() const;
+
+  /**
+   * Retrieve the relative Standard Deviation change matrix of experiments.
+   * @return CArrayAnnotation & relSDMatrix
+   */
+  CDataArray & getRelSDMatrix() const;
+
+  /**
    * Retrieve the Eigenvalues of the Fisher Information Matrix of the solution variables.
    * @return CArrayAnnotation & fimEigenvalues
    */

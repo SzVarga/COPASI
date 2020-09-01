@@ -215,6 +215,19 @@ bool CQFittingWidget::saveTaskProtected()
     {
       mChanged = true;
       pProblem->setCalculateStatistics(mpCheckStatistics->isChecked());
+      if(mpCheckStatistics->isChecked())
+        mpCheckPartialStatistics->setEnabled(true);
+      else
+        {
+          mpCheckPartialStatistics->setEnabled(false);
+          pProblem->setCalculatePartialStatistics(false);
+          mpCheckPartialStatistics->setChecked(false);
+        }
+    }
+  if (mpCheckPartialStatistics->isChecked() != pProblem->getCalculatePartialStatistics())
+    {
+      mChanged = true;
+      pProblem->setCalculatePartialStatistics(mpCheckPartialStatistics->isChecked());
     }
 
   if (mpUseTimeSens->isChecked() != pProblem->getUseTimeSens())
@@ -273,6 +286,7 @@ bool CQFittingWidget::loadTaskProtected()
   mpCheckRandomize->setChecked(pProblem->getRandomizeStartValues());
   mpCreateParameterSets->setChecked(pProblem->getCreateParameterSets());
   mpCheckStatistics->setChecked(pProblem->getCalculateStatistics());
+  mpCheckPartialStatistics->setChecked(pProblem->getCalculatePartialStatistics());
   mpUseTimeSens->setChecked(pProblem->getUseTimeSens());
 
   mpParameters->load(mpDataModel, pProblem->getGroup("OptimizationItemList"), &mExperimentKeyMap, &mCrossValidationKeyMap);
@@ -381,6 +395,8 @@ void CQFittingWidget::init()
   mpCurrentList = mpParameters;
   mpExperimentSet = NULL;
   mpCrossValidationSet = NULL;
+
+  //connect(mpCheckStatistics, SIGNAL(stateChanged(int)), this, SLOT(slotCheckStatisticsChange(int)));
 }
 
 void CQFittingWidget::slotParameterNumberChanged(int number)
@@ -413,3 +429,23 @@ void CQFittingWidget::slotCrossValidationData()
 
   pdelete(pDialog);
 }
+
+/* TODO: Debug
+void CQFittingWidget::slotCheckStatisticsChange(int checkStatus)
+{
+  CFitProblem * pProblem = dynamic_cast<CFitProblem *>(mpTask->getProblem());
+  if (!pProblem) return;
+
+  pProblem->setCalculateStatistics(bool(checkStatus));
+  if(checkStatus)
+    mpCheckPartialStatistics->setEnabled(true);
+  else
+    {
+      mpCheckPartialStatistics->setEnabled(false);
+      pProblem->setCalculatePartialStatistics(false);
+      mpCheckPartialStatistics->setChecked(false);
+    }
+
+  pdelete(pProblem);
+}
+*/

@@ -234,6 +234,11 @@ bool CQFittingResult::enterProtected()
       mpTabWidget->setTabEnabled(mpTabWidget->indexOf(mpCrossValidationValues), false);
     }
 
+  if (mpProblem->getCalculatePartialStatistics())
+    mpTabWidget->setTabEnabled(mpTabWidget->indexOf(mpPartialStatisticsPage), true);
+  else
+    mpTabWidget->setTabEnabled(mpTabWidget->indexOf(mpPartialStatisticsPage), false);
+
   // determine background color for values too close to the bounds
   QColor BackgroundColor = mpParameters->palette().brush(QPalette::Active, QPalette::Base).color();
 
@@ -367,6 +372,16 @@ bool CQFittingResult::enterProtected()
   mpFisherInformationScaledEigenvectors->setColorScalingAutomatic(true);
   mpFisherInformationScaledEigenvectors->setArrayAnnotation(&mpProblem->getScaledFisherInformationEigenvectors());
   mpFisherInformationScaledEigenvectors->slotRowSelectionChanged(1);
+
+  tcs = new CColorScaleBiLog();
+  mpRelFisherInformationMatrix->setColorCoding(tcs);
+  mpRelFisherInformationMatrix->setColorScalingAutomatic(true);
+  mpRelFisherInformationMatrix->setArrayAnnotation(&mpProblem->getRelFisherInformation());
+
+  tcs = new CColorScaleBiLog();
+  mpRelSDMatrix->setColorCoding(tcs);
+  mpRelSDMatrix->setColorScalingAutomatic(true);
+  mpRelSDMatrix->setArrayAnnotation(&mpProblem->getRelSDMatrix());
 
   bool Enable = (mpProblem->getCrossValidationSet().getExperimentCount() > 0);
 

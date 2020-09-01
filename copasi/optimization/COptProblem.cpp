@@ -88,6 +88,7 @@ COptProblem::COptProblem(const CTaskEnum::Task & type,
   mpParmMaximize(NULL),
   mpParmRandomizeStartValues(NULL),
   mpParmCalculateStatistics(NULL),
+  mpParmCalculatePartialStatistics(NULL),
   mpGrpItems(NULL),
   mpGrpConstraints(NULL),
   mpOptItems(NULL),
@@ -129,6 +130,7 @@ COptProblem::COptProblem(const COptProblem& src,
   mpParmMaximize(NULL),
   mpParmRandomizeStartValues(NULL),
   mpParmCalculateStatistics(NULL),
+  mpParmCalculatePartialStatistics(NULL),
   mpGrpItems(NULL),
   mpGrpConstraints(NULL),
   mpOptItems(NULL),
@@ -171,6 +173,7 @@ void COptProblem::initializeParameter()
   mpParmMaximize = assertParameter("Maximize", CCopasiParameter::Type::BOOL, false);
   mpParmRandomizeStartValues = assertParameter("Randomize Start Values", CCopasiParameter::Type::BOOL, false);
   mpParmCalculateStatistics = assertParameter("Calculate Statistics", CCopasiParameter::Type::BOOL, true);
+  mpParmCalculatePartialStatistics = assertParameter("Calculate Partial Statistics", CCopasiParameter::Type::BOOL, false);
 
   mpGrpItems = assertGroup("OptimizationItemList");
   mpGrpConstraints = assertGroup("OptimizationConstraintList");
@@ -861,6 +864,12 @@ void COptProblem::setCalculateStatistics(const bool & calculate)
 
 const bool & COptProblem::getCalculateStatistics() const
 {return *mpParmCalculateStatistics;}
+
+void COptProblem::setCalculatePartialStatistics(const bool & calculate)
+{*mpParmCalculatePartialStatistics = calculate;}
+
+const bool &COptProblem::getCalculatePartialStatistics() const
+{return *mpParmCalculatePartialStatistics;}
 
 const unsigned C_INT32 & COptProblem::getFunctionEvaluations() const
 {return mCounter;}

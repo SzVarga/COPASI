@@ -132,6 +132,7 @@ bool CFitTask::process(const bool & useInitialValues)
   bool success = pMethod->optimise();
 
   pProblem->calculateStatistics();
+  pProblem->calculatePartialStatistics(); /* should only be called after calculateStatistics has been called */
   pProblem->createParameterSets();
 
   output(COutputInterface::AFTER);

@@ -2399,8 +2399,6 @@ bool CFitProblem::calculateStatistics(const C_FLOAT64 & factor,
         }
         */
 
-      calculatePartialStatistics();
-
       setResidualsRequired(false);
       mStoreResults = true;
       // This is necessary so that CExperiment::printResult shows the correct data.

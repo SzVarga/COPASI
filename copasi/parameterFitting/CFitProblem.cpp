@@ -1825,7 +1825,7 @@ bool CFitProblem::calcRelFIM(const CMatrix<double> &partial, const CMatrix<doubl
   {
       for(size_t j{}; j < jmax; ++j)
       {
-          relMat(i, j) = partial(i, j) / complete(i, i);
+          relMat(i, j) = partial(i, j) / complete(j, j);
       }
   }
   return true;
@@ -2424,7 +2424,7 @@ bool CFitProblem::calculatePartialStatistics()
   std::vector< size_t > ExperimentStartInResiduals = {0};
   CExperiment* pExperiment;
   size_t i{}, imax{mpExperimentSet->getExperimentCount()};
-  size_t j{}, jmax{mSolutionVariables.size()}; /* Number of parameters */
+  size_t jmax{mSolutionVariables.size()}; /* Number of parameters */
   size_t expStart{};
 
   // Resize partial matrices and partial sd vectors
@@ -2578,7 +2578,7 @@ bool CFitProblem::calculatePartialStatistics()
   calcSummarySD(mParParameterSDXContainer, mParParameterSDX);
 
   calcRelFIM(mScaledParFIM, mFisherScaled, mRelFIM);
-  calcRelSD(mParParameterSD, mParameterSD, mRelSD);
+  calcRelSD(mParParameterSDX, mParameterSD, mRelSD);
 
   /* Annotations */
   std::vector<COptItem * >::iterator it = mpOptItems->begin();
@@ -2623,19 +2623,13 @@ bool CFitProblem::calculatePartialStatistics()
     }
 
   // Code testing
+  /*std::cout << *mpParFIMatrix << std::endl;
     std::cout << "Testing of code:" << std::endl;
     std::cout << "Experiments: " << imax << " Parameters: " << jmax << std::endl;
-    std::cout << *mpParFIMatrix << std::endl;
-    std::cout << *mpParFIMXatrix << std::endl;
-    std::cout << std::endl;
-    std::cout << *mpScaledParFIMatrix << std::endl;
-    std::cout << *mpScaledParFIMXatrix << std::endl;
-    std::cout << std::endl;
-    std::cout << *mpParParameterSDMatrix << std::endl;
-    std::cout << *mpParParameterSDXMatrix << std::endl;
-    std::cout << std::endl;
-    std::cout << *mpRelFIMatrix << std::endl;
-    std::cout << *mpRelSDMatrix << std::endl;
+    std::cout << mParParameterSDX << std::endl;
+    std::cout << mParameterSD << std::endl;
+    std::cout << mRelSD << std::endl;
+  */
 
   // Clean up
   pdelete(pExperiment);

@@ -128,6 +128,7 @@ bool CFitTask::process(const bool & useInitialValues)
     mProcessReport.setIgnoreStop();
 
   pProblem->calculateStatistics();
+  pProblem->calculatePartialStatistics();
   pProblem->createParameterSets();
 
   output(COutputInterface::AFTER);

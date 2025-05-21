@@ -2667,17 +2667,24 @@ bool CFitProblem::calculatePartialStatistics()
     }
 
   // Code testing
-  /*std::cout << *mpParFIMatrix << std::endl;
-    std::cout << "Testing of code:" << std::endl;
-    std::cout << "Experiments: " << imax << " Parameters: " << jmax << std::endl;
-    std::cout << mParParameterSDX << std::endl;
-    std::cout << mParameterSD << std::endl;
-    std::cout << mRelSD << std::endl;
+  /*
+  std::cout << *mpParFIMatrix << std::endl;
+  std::cout << "Testing of code:" << std::endl;
+  std::cout << "Experiments: " << imax << " Parameters: " << jmax << std::endl;
+  std::cout << mParParameterSDX << std::endl;
+  std::cout << mParameterSD << std::endl;
+  std::cout << mRelSD << std::endl;
   */
+  for (i = 0; i < imax; ++i)
+    {
+      std::cout << "Scaled Fisher M for Exp: " << i << std::endl;
+      std::cout << *(mScaledParFIMContainer.at(i)) << std::endl;
+      std::cout << std::endl;
+    }
 
   // Clean up
-  pdelete(pExperiment);
-  pdelete(pItem);
+  //pdelete(pExperiment);
+  //pdelete(pItem);
 
   // Everything went well
   return true;

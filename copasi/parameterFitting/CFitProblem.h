@@ -177,35 +177,6 @@ public:
   void calcPartialFIM(const CMatrix< C_FLOAT64 >& jacobian, CMatrix< C_FLOAT64 >& fim, size_t a, size_t b, bool exclude = false);
 
   /**
-   * calculate the summary fisher information matrix for the experiments
-   * @param vector of partial FIMs
-   * @return Matrix containing the diagonal elements of the input matrices as rows
-   */
-  bool calcSummaryFIM(const std::vector< CMatrix< C_FLOAT64 > * >& iMatVec, CMatrix< C_FLOAT64 >& oMat);
-
-  /**
-   * calculate the summary sd Matrix for the experiments
-   * @param Vector of SD-Vectors of the parameters
-   * @return Matrix containing the SD-Vectors as rows
-   */
-  bool calcSummarySD(const std::vector< CVector< C_FLOAT64 > * >& iSDVec, CMatrix< C_FLOAT64 >& oMat);
-
-  /**
-   * calculate matrices containing relative values
-   * @param  summary partial Matrix (FIM or CovM) and complete FIM or CovM
-   * @return matrix containing relative entries
-   */
-  bool calcRelFIM(const CMatrix< C_FLOAT64 >& partial, const CMatrix< C_FLOAT64 >& complete, CMatrix< C_FLOAT64 >& relMat);
-
-  /**
-   * calculate matrix of relative standard deviation of parameters
-   * @param  summary partial sd matrix and complete parameter sd vector
-   * @return matrix containing change of parameter sd uppon discarding single experiment
-   */
-  bool calcRelSD(const CMatrix< C_FLOAT64 >& partial, const CVector< C_FLOAT64 >& complete,
-                 CMatrix< C_FLOAT64 >& relMat);
-
-  /**
    * calculate the Eigenvalues and -vectors for a matrix.
    * This is intended for the FIM, and we assume only real (and positive) eigenvalues
    */
@@ -227,13 +198,6 @@ public:
    */
   virtual bool calculateStatistics(const C_FLOAT64 & factor = 1.0e-003,
                                    const C_FLOAT64 & resolution = 1.0e-009) override;
-
-  /**
-   * Calculate advanced statistics for the problem
-   * All partial fisher information and covariance matrices are calculated
-   * based on experiments used for parameter estimation
-   */
-  bool calculatePartialStatistics();
 
   /**
    * Retrieve the root mean square of the objective value.
@@ -269,18 +233,6 @@ public:
    * @return CArrayAnnotation & fisherInformationMatrix
    */
   CDataArray & getFisherInformation() const;
-
-  /**
-   * Retrieve the Relative Fisher Information content matrix of experiments.
-   * @return CArrayAnnotation & relFIMatrix
-   */
-  CDataArray & getRelFisherInformation() const;
-
-  /**
-   * Retrieve the relative Standard Deviation change matrix of experiments.
-   * @return CArrayAnnotation & relSDMatrix
-   */
-  CDataArray & getRelSDMatrix() const;
 
   /**
    * Retrieve the Eigenvalues of the Fisher Information Matrix of the solution variables.
@@ -596,17 +548,6 @@ private:
   CVector< C_FLOAT64 > mParameterSD;
 
   /**
-   * The vectors of standard deviations of parameters
-   * using subset of experiments selected for parameter estimation
-   * Calculated for both a single experiment and all experiments
-   * except one (excluded - X in the attribute name)
-   */
-  std::vector< CVector< C_FLOAT64 > * > mParParameterSDContainer;
-  std::vector< CVector< C_FLOAT64 > * > mParParameterSDXContainer;
-  std::vector< CVector< C_FLOAT64 > * > mScaledParParameterSDContainer;
-  std::vector< CVector< C_FLOAT64 > * > mScaledParParameterSDXContainer;
-
-  /**
    * the Jacobian of tha parameter estimation,
    *i.e. the derivatives of the residuals with respect to the parameters
    */
@@ -667,62 +608,6 @@ private:
   CDataArray * mpCorrelationMatrix;
 
   /**
-   * Partial Fisher Information and Covariance matrices
-   * based on a subset of experiments selected for parameter estimation
-   * Matrices are calculated either based on a single experiment
-   * or all experiments except one (excluded - X in the attribute name)
-   */
-  std::vector< CMatrix< C_FLOAT64 > * > mParFIMContainer;
-  std::vector< CMatrix< C_FLOAT64 > * > mParFIMXContainer;
-  std::vector< CMatrix< C_FLOAT64 > * > mScaledParFIMContainer;
-  std::vector< CMatrix< C_FLOAT64 > * > mScaledParFIMXContainer;
-  std::vector< CMatrix< C_FLOAT64 > * > mParCovMContainer;
-  std::vector< CMatrix< C_FLOAT64 > * > mParCovMXContainer;
-  std::vector< CMatrix< C_FLOAT64 > * > mScaledParCovMContainer;
-  std::vector< CMatrix< C_FLOAT64 > * > mScaledParCovMXContainer;
-
-  /**
-   * Summary Partial Fisher Information and Standard deviations
-   * of experiments selected for parameter estimation
-   * Matrices are calculated either based on a single experiment
-   * or all experiments except one (excluded - X in the attribute name)
-   */
-  CMatrix< C_FLOAT64 > mParFIM;
-  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpParFIMInterface;
-  CDataArray * mpParFIMatrix;
-  CMatrix< C_FLOAT64 > mParFIMX;
-  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpParFIMXInterface;
-  CDataArray * mpParFIMXatrix;
-  CMatrix< C_FLOAT64 > mScaledParFIM;
-  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpScaledParFIMInterface;
-  CDataArray * mpScaledParFIMatrix;
-  CMatrix< C_FLOAT64 > mScaledParFIMX;
-  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpScaledParFIMXInterface;
-  CDataArray * mpScaledParFIMXatrix;
-  CMatrix< C_FLOAT64 > mParParameterSD;
-  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpParParameterSDInterface;
-  CDataArray * mpParParameterSDMatrix;
-  CMatrix< C_FLOAT64 > mParParameterSDX;
-  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpParParameterSDXInterface;
-  CDataArray * mpParParameterSDXMatrix;
-
-  /**
-   * The Relative Fisher Information matrix,
-   * containing relative information content of single experiments on parameters
-   */
-  CMatrix< C_FLOAT64 > mRelFIM;
-  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpRelFIMInterface;
-  CDataArray * mpRelFIMatrix;
-
-  /**
-   * The Relative sd matrix, containing the relative
-   * change of parameter sd, when a single experiment is neglected
-   */
-  CMatrix< C_FLOAT64 > mRelSD;
-  CMatrixInterface< CMatrix< C_FLOAT64 > > * mpRelSDInterface;
-  CDataArray * mpRelSDMatrix;
-
-  /**
    * A pointer to the value of the CCopasiParameter holding Create Parameter Sets
    */
   bool * mpCreateParameterSets;
@@ -735,6 +620,8 @@ private:
   CMatrix< C_FLOAT64 > mJacTimeSens;
 
   CRegisteredCommonName * mpParmTimeSensCN;
+
+  friend class CPartialFimResult;
 };
 
 #endif  // COPASI_CFitProblem

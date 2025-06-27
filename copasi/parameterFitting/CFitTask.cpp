@@ -103,6 +103,8 @@ bool CFitTask::initialize(const OutputFlag & of,
   return COptTask::initialize(of, pOutputHandler, pOstream);
 }
 
+#include "CPartialFimResult.h"
+
 bool CFitTask::process(const bool & useInitialValues)
 {
   CFitProblem * pProblem = dynamic_cast<CFitProblem *>(mpProblem);
@@ -128,7 +130,9 @@ bool CFitTask::process(const bool & useInitialValues)
     mProcessReport.setIgnoreStop();
 
   pProblem->calculateStatistics();
-  pProblem->calculatePartialStatistics();
+  CPartialFimResult result(pProblem);
+  
+  //pProblem->calculatePartialStatistics();
   pProblem->createParameterSets();
 
   output(COutputInterface::AFTER);
